@@ -3,7 +3,7 @@ var util = require('util');
 
 var Controller = require('./Controller');
 var View = require('./View');
-var ViewContext = require('./ViewContext');
+var ViewStack = require('./ViewStack');
 
 
 var ViewController = function () {
@@ -11,7 +11,7 @@ var ViewController = function () {
 
 	this.layout_name_ = '@layout';
 
-	this.view = new ViewContext();
+	this.view = new ViewStack();
 };
 
 util.inherits(ViewController, Controller);

@@ -1,24 +1,24 @@
 var Controller = require('./Controller');
 
 
-var ViewContext = function () {
-	this.stack_ = [];
+var ViewStack = function () {
+	this.views_ = [];
 };
 
-ViewContext.prototype.pushView = function (view) {
-	this.stack_.unshift(view);
+ViewStack.prototype.pushView = function (view) {
+	this.views_.unshift(view);
 };
 
-ViewContext.prototype.execute = function (callback, ctx) {
+ViewStack.prototype.execute = function (callback, ctx) {
 	var context = this;
-	var stack = this.stack_;
-	var i = stack.length;
+	var views = this.views_;
+	var i = views.length;
 
 	callback = Controller.createSafeCallback(callback, ctx);
 
 	var iter = function (target_rendering) {
 		if (i) {
-			var view = stack[--i];
+			var view = views[--i];
 			view.render(context, function (err, partial_rendering) {
 				if (err) {
 					callback.call(ctx, err, null);
@@ -35,4 +35,4 @@ ViewContext.prototype.execute = function (callback, ctx) {
 };
 
 
-module.exports = ViewContext;
+module.exports = ViewStack;
