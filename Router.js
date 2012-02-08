@@ -6,15 +6,15 @@ var DeclarationParser = require('./DeclarationParser');
 
 
 var Router = function () {
-	this.controller_path_ = path.dirname(require.main.filename);
+	this.app_path_ = path.dirname(require.main.filename);
 	this.route_declaration_path_ = null;
 	this.type_handlers_ = {};
 	this.isLoaded_ = false;
 };
 
-Router.prototype.setControllerPath = function (controller_path) {
+Router.prototype.setAppPath = function (app_path) {
 	var main_path = path.dirname(require.main.filename);
-	this.controller_path_ = path.resolve(main_path, controller_path);
+	this.app_path_ = path.resolve(main_path, app_path);
 };
 
 Router.prototype.setRouteDeclaration = function (file_path) {
@@ -99,20 +99,37 @@ Router.prototype.routeToControllerAction_ = function (request, response, target,
 	var controller_name = target_parts[1].replace(/^\W?[a-z]/, function (str) { return str.toUpperCase() });
 	var action = target_parts[2];
 
-	var controller_path = path.join(this.controller_path_, target_parts[0], controller_name + 'Controller.js');
+	var controller_path = path.join(this.app_path_, 'controllers', target_parts[0], controller_name + 'Controller.js');
+	var template_root = path.join(this.app_path_, 'views', target_parts[0]);
 
+	var self = this;
 	var startAction = function (missingTargetActionCallback) {
+		var Controller;
+		var controller;
 		try {
-			var Controller = require(controller_path);
-			var controller = new Controller(request, response);
-			if (!controller[action]) {
+			Controller = require(controller_path);
+			controller = new Controller(target_parts[0] + ':' + controller_name, request, response);
+			if (!controller.hasAction(action)) {
 				missingTargetActionCallback();
-			} else {
-				controller[action](params);
+				return;
 			}
 		} catch (err) {
 			log(err.stack);
 			response.end(500);
+		}
+
+		if (controller) {
+			if (controller.view) {
+				// If the controller does feature a view, provide paths to its template files
+				controller.setTemplateRoot(template_root);
+			}
+
+			try {
+				controller.callAction(action, params);
+			} catch (err) {
+				log(err.stack);
+				response.end(500);
+			}
 		}
 	};
 

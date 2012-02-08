@@ -1,0 +1,9 @@
+[submodule "node_modules/eco"]
+	path = node_modules/eco
+	url = git://github.com/sstephenson/eco.git
+[submodule "node_modules/coffee-script"]
+	path = node_modules/coffee-script
+	url = git://github.com/jashkenas/coffee-script.git
+[submodule "node_modules/strscan-js"]
+	path = node_modules/strscan-js
+	url = git://github.com/sstephenson/strscan-js.git
