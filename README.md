@@ -70,3 +70,5 @@ The simpliest application (a static resource server) would be defined like this:
 **Start your app.**
 
     node boot
+
+**Check out the official [Darkside Wiki](https://github.com/jankuca/darkside/wiki) for more information.**
