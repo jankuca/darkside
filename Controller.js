@@ -66,6 +66,10 @@ Controller.prototype.getAction = function () {
 	return this.action_;
 };
 
+Controller.prototype.getSession = function () {
+	return this.session_ || null;
+};
+
 Controller.prototype.redirectTo = function (target, params) {
 	var link = this.linkTo(target);
 	if (!link) {

@@ -1,10 +1,23 @@
 var url = require('url');
 
+var Controller = require('../Controller');
+var Session = require('../models/Session');
+
 
 var ServerRequest = function (req) {
 	this.native_request_ = req;
 	this.url_ = url.parse(req.url, true);
-	this.pathname_ = this.url_.pathname;
+	this.pathname_ = this.url_.pathname.replace(/\/$/, '') || '/';
+
+	var cookies = {};
+	var cookie_header = req.headers['cookie'];
+	if (cookie_header) {
+		cookie_header.split('; ').forEach(function (pair) {
+			var cookie = pair.match(/^(.*?)=(.*)$/);
+			cookies[cookie[1]] = cookie[2];
+		});
+	}
+	this.cookies = cookies;
 };
 
 ServerRequest.prototype.getPathname = function () {
@@ -46,6 +59,15 @@ ServerRequest.prototype.getHostLevels = function () {
 		return levels;
 	}
 	return levels.slice(1);
+};
+
+ServerRequest.prototype.getSession = function (key, callback, ctx) {
+	callback = Controller.createSafeCallback(callback, ctx);
+
+	var id = this.cookies[key] || Session.generateId(this);
+	Session.getById(id, function (err, session) {
+		callback.call(ctx, err, session);
+	}, ctx);
 };
 
 
