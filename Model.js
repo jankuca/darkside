@@ -1,5 +1,7 @@
 var log = require('sys').log;
 
+var Controller = require('./Controller');
+
 
 var Model = function (doc) {
 	if (!doc) {
@@ -27,6 +29,7 @@ Model.create = function (key) {
 	M.prototype.constructor = M;
 
 	M.collection_name_ = key + 's';
+	M.prototype.collection_name_ = key + 's';
 	M.one = function (selector, callback, ctx) {
 		return Model.one(M, selector, callback, ctx);
 	};
@@ -37,11 +40,19 @@ Model.create = function (key) {
 	return M;
 };
 
-Model.one = function (M, selector, callback, ctx) {
+Model.one = function (M, selector, options, callback, ctx) {
+	if (arguments.length === 4 && typeof arguments[2] === 'function') {
+		ctx = arguments[3];
+		callback = arguments[2];
+		options = {};
+	}
+
 	var db = Model.db_;
 	var collection = db.getCollection(M.collection_name_);
 
-	collection.findOne(selector, function (err, doc) {
+	callback = Controller.createSafeCallback(callback, ctx);
+
+	collection.findOne(selector, options, function (err, doc) {
 		if (err) {
 			callback.call(ctx, err, null);
 		} else {
@@ -49,6 +60,73 @@ Model.one = function (M, selector, callback, ctx) {
 			callback.call(ctx, null, model);
 		}
 	});
+};
+
+Model.all = function (M, selector, options, callback, ctx) {
+	if (arguments.length === 4 && typeof arguments[2] === 'function') {
+		ctx = arguments[3];
+		callback = arguments[2];
+		options = {};
+	}
+
+	var db = Model.db_;
+	var collection = db.getCollection(M.collection_name_);
+
+	callback = Controller.createSafeCallback(callback, ctx);
+
+	collection.find(selector, options, function (err, docs) {
+		if (err) {
+			callback.call(ctx, err, null);
+		} else {
+			var _M = M; // cache the constructor
+			var models = docs.map(function (doc) {
+				return new M(doc);
+			});
+
+			callback.call(ctx, null, models);
+		}
+	});
+};
+
+
+Model.prototype.save = function (callback, ctx) {
+	callback = Controller.createSafeCallback(callback, ctx);
+
+	var self = this;
+	var doc = this.getUpdatedDoc_();
+	var db = Model.db_;
+	var collection = db.getCollection(this.collection_name_);
+
+	collection[this.stored ? 'update' : 'insert'](doc, function (err, response) {
+		if (err) {
+			callback.call(ctx, err);
+		} else {
+			self.doc = doc;
+			self.id = doc['_id'];
+			self.stored = true;
+			callback.call(ctx, null);
+		}
+	});
+};
+
+Model.prototype.getUpdatedDoc_ = function () {
+	var doc = this.doc;
+	var updated = {};
+
+	Object.keys(doc).forEach(function (key) {
+		updated[key] = doc[id];
+	});
+	Object.keys(this).forEach(function (key) {
+		if (key.indexOf(':') !== -1) {
+			updated[key] = this[key];
+		}
+	}, this);
+
+	if (this.id) {
+		updated['_id'] = this.id;
+	}
+
+	return updated;
 };
 
 
