@@ -1,3 +1,6 @@
+[submodule "node_modules/mongodb-lite"]
+	path = node_modules/mongodb-lite
+	url = git://github.com/jankuca/mongodb-lite.git
 [submodule "node_modules/eco"]
 	path = node_modules/eco
 	url = git://github.com/sstephenson/eco.git
