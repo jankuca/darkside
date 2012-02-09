@@ -33,6 +33,9 @@ HTTPServerResponse.prototype.body = function (data, encoding) {
 	if (typeof data === 'object') {
 		data = JSON.stringify(data, ' ', 2);
 	}
+	if (!this.head_sent_) {
+		this.head(200);
+	}
 	res.write(data, encoding);
 
 	return this;
