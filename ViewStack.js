@@ -9,8 +9,7 @@ ViewStack.prototype.pushView = function (view) {
 	this.views_.unshift(view);
 };
 
-ViewStack.prototype.execute = function (callback, ctx) {
-	var context = this;
+ViewStack.prototype.execute = function (context, callback, ctx) {
 	var views = this.views_;
 	var i = views.length;
 

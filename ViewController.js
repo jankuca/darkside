@@ -10,8 +10,9 @@ var ViewController = function () {
 	Controller.apply(this, arguments);
 
 	this.layout_name_ = '@layout';
+	this.view_stack_ = new ViewStack();
 
-	this.view = new ViewStack();
+	this.view = {};
 };
 
 util.inherits(ViewController, Controller);
@@ -49,18 +50,22 @@ ViewController.prototype.beforeRender = function () {
 	var root_path = layout_path || page_path;
 
 	var page_view = this.createView(page_path);
-	this.view.pushView(page_view);
+	this.addView(page_view);
 
 	if (root_path !== page_path) {
 		var root_view = this.createView(root_path);
-		this.view.pushView(root_view);
+		this.addView(root_view);
 	}
+};
+
+ViewController.prototype.addView = function (view) {
+	this.view_stack_.pushView(view);
 };
 
 ViewController.prototype.render = function (status) {
 	this.beforeRender();
 
-	this.view.execute(function (err, rendering) {
+	this.view_stack_.execute(this.view, function (err, rendering) {
 		if (err) {
 			log(err.toString());
 			this.response.end(500);
