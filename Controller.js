@@ -12,6 +12,22 @@ var Controller = function (name, router, request, response) {
 };
 
 
+Controller.createSafeCallback = function (callback, controller) {
+	return function () {
+		try {
+			callback.apply(this, arguments);
+
+		} catch (err) {
+			log(err.stack);
+
+			if (controller instanceof Controller) {
+				controller.response.end(500);
+			}
+		}
+	};
+};
+
+
 Controller.prototype.hasAction = function (action) {
 	return (typeof this[action] === 'function');
 };
