@@ -1,7 +1,8 @@
 var log = require('sys').log;
 
 
-var Controller = function (name, request, response) {
+var Controller = function (name, router, request, response) {
+	this.router = router;
 	this.request = request;
 	this.response = response;
 
@@ -47,6 +48,29 @@ Controller.prototype.getName = function () {
 
 Controller.prototype.getAction = function () {
 	return this.action_;
+};
+
+Controller.prototype.redirectTo = function (target, params) {
+	var link = this.linkTo(target);
+	if (!link) {
+		throw new Error('No route for the redirection target ' + target);
+	}
+	this.response.header('location', link);
+	this.response.end(302);
+};
+
+Controller.prototype.linkTo = function (target, params) {
+	target = target.split(':');
+	target = [
+		target[target.length - 3] || this.getParentName(),
+		target[target.length - 2] || this.getName(),
+		target[target.length - 1] || 'index'
+	].join(':');
+
+	params = params || {};
+
+	var link = this.router.getTargetURL(target, params, this.request);
+	return link;
 };
 
 

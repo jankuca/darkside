@@ -3,15 +3,27 @@ var ServerResponse = require('./ServerResponse');
 
 var HTTPServerResponse = function (res) {
 	ServerResponse.call(this, res);
+
+	this.head_sent_ = false;
+	this.headers_ = [];
 };
 
 require('util').inherits(HTTPServerResponse, ServerResponse);
 
 HTTPServerResponse.prototype.head = function (status) {
+	if (this.head_sent_) {
+		throw new Error('Response head already sent.');
+	}
+
 	var res = this.getNativeResponse();
-	res.writeHead(status);
+	res.writeHead(status, this.headers_);
+	this.head_sent_ = true;
 
 	return this;
+};
+
+HTTPServerResponse.prototype.header = function (key, value) {
+	this.headers_.push([ key, value ]);
 };
 
 HTTPServerResponse.prototype.body = function (data, encoding) {

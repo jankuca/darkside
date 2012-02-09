@@ -26,6 +26,55 @@ Router.prototype.setRouteTypeHandler = function (type, handler) {
 	this.type_handlers_[type] = handler;
 };
 
+Router.prototype.getTargetURL = function (target, params, request) {
+	params = params || {};
+
+	var route = this.getRouteByTargetAndParams_(target, params);
+	if (!route) {
+		return null;
+	}
+
+	var pathname_and_search = this.fillPathnameWithParams_(route.pathname, params);
+
+	// If the route belongs to a different host than the original request
+	var host_levels = request ? request.getHostLevels() : [ route.host ];
+	var current_host = host_levels[0];
+	if (current_host === route.host) {
+		return pathname_and_search;
+	} else {
+		host_levels[0] = route.host;
+		// We need to keep the eventual :port part of the host.
+		var port = request.getPort();
+		port = port === 80 ? '' : ':' + port;
+		var host = host_levels.join('.').replace(/\.$/, '') + port;
+
+		return 'http://' + host + pathname_and_search;
+	}
+};
+
+Router.prototype.getRouteByTargetAndParams_ = function (target, params) {
+	var hosts = Object.keys(this.hosts_);
+	for (var i = 0, ii = hosts.length; i < ii; ++i) {
+		var host = hosts[i];
+		var routes = this.hosts_[host];
+		for (var o = 0, oo = routes.length; o < oo; ++o) {
+			var route = routes[o];
+			if (route.target === target) {
+				// We need to check if all the param placeholders in the route pathname pattern
+				// would be filled with the given parameters.
+				var param_placeholders = route.pathname.match(/:[\w\-]+/g) || [];
+				var all_params_match = param_placeholders.every(function (key) {
+					return (typeof params[key.substr(1)] !== 'undefined');
+				});
+				if (all_params_match) {
+					return route;
+				}
+			}
+		}
+	}
+	return null;
+};
+
 Router.prototype.route = function (request, response) {
 	var self = this;
 
@@ -50,7 +99,7 @@ Router.prototype.route_ = function (request, response) {
 	var pathname = request.getPathname();
 
 	var route = this.getRouteByHostAndPathname_(host, pathname);
-	var target = (typeof route === 'number') ? route : route[2];
+	var target = (typeof route === 'number') ? route : route.target;
 
 	switch (typeof target) {
 		case 'number':
@@ -60,15 +109,14 @@ Router.prototype.route_ = function (request, response) {
 
 		case 'string':
 			log(method + ' ' + pathname + ' -> ' + target);
-			this.routeToControllerAction_(request, response, target, route[3]);
+			this.routeToControllerAction_(request, response, target, route.params);
 			return;
 
 		default:
 			log(method + ' ' + pathname + ' -> [type handler]');
-			route[0] = route[0].replace(/\*$/, '');
-			pathname = '/' + path.relative(route[0], pathname);
+			pathname = '/' + path.relative(route.pathname, pathname);
 			request.setPathname(pathname);
-			target.handle(request, response, route[3]);
+			target.handle(request, response, route.params);
 	}
 };
 
@@ -81,15 +129,22 @@ Router.prototype.getRouteByHostAndPathname_ = function (host, pathname) {
 	var route, match, param_keys, params;
 	for (var i = 0, ii = routes.length; i < ii; ++i) {
 		route = routes[i];
-		match = pathname.match(route[1]);
+		match = pathname.match(route.pattern);
 		if (match) {
-			param_keys = route[0].match(/:[\w\-]+/g) || [];
+			var pathname = route.pathname.replace(/\*$/, '');
+			param_keys = pathname.match(/:[\w\-]+/g) || [];
 			params = {};
 			param_keys.forEach(function (key, i) {
 				key = key.substr(1);
 				params[key] = match[i + 1];
+				pathname = pathname.replace(':' + key, match[i + 1]);
 			});
-			return route.concat([ params ]);
+			return {
+				host: route.host,
+				pathname: pathname,
+				target: route.target,
+				params: params
+			};
 		}
 	}
 };
@@ -145,6 +200,21 @@ Router.prototype.routeToControllerAction_ = function (request, response, target,
 	});
 };
 
+Router.prototype.fillPathnameWithParams_ = function (pathname, params) {
+	var placeholders = pathname.match(/:[\w\-]+/g) || [];
+	var query = [];
+	Object.keys(params).forEach(function (key) {
+		var value = params[key];
+		if (placeholders.indexOf(':' + key) !== -1) {
+			pathname = pathname.replace(':' + key, value);
+		} else {
+			query.push(key + '=' + encodeURIComponent(value));
+		}
+	});
+
+	return pathname + (query.length ? '?' + query.join('&') : '');
+};
+
 Router.prototype.update_ = function (callback) {
 	var file_path = this.route_declaration_path_;
 	if (!file_path) {
@@ -175,12 +245,13 @@ Router.prototype.updateRoutes_ = function (declaration) {
 			if (item.constructor === Object) {
 				level(resource_path, item, routes);
 			} else {
+				resource_path = resource_path.replace(/\/$/, '') || '/';
 				routes.push([ resource_path, item ]);
 			}
 		});
 	};
 
-	var process = function (routes) {
+	var process = function (host, routes) {
 		routes = routes.sort(function (a, b) {
 			a = a[0];
 			b = b[0];
@@ -193,18 +264,24 @@ Router.prototype.updateRoutes_ = function (declaration) {
 		});
 
 		return routes.map(function (route) {
-			var path = route[0];
-			path = path.replace('*', '.*');
-			path = path.replace(/:[\w\-]+/g, '([^\\/]+)');
-			var pattern = new RegExp('^' + path + '$');
-			return [ route[0], pattern, route[1] ];
+			var pathname = route[0];
+			pathname = pathname.replace('*', '.*');
+			pathname = pathname.replace(/:[\w\-]+/g, '([^\\/]+)');
+			var pattern = new RegExp('^' + pathname + '$');
+
+			return {
+				host: host,
+				pathname: route[0],
+				pattern: pattern,
+				target: route[1]
+			};
 		});
 	};
 
 	Object.keys(declaration).forEach(function (host) {
 		var routes = [];
 		level('/', declaration[host], routes);
-		routes = process(routes);
+		routes = process(host, routes);
 
 		this.hosts_[host] = routes;
 	}, this);
