@@ -11,8 +11,8 @@ var View = function (template_path) {
 
 
 View.prototype.render = function (context, callback) {
-	var components = context.components || {};
-	context.components = components;
+	var components = context.$$components || {};
+	context.$$components = components;
 
 	context.component = function (key, component) {
 		if (component) {
@@ -38,6 +38,8 @@ View.prototype.render = function (context, callback) {
 			}
 		}
 	});
+
+	delete context.component;
 };
 
 
