@@ -99,6 +99,12 @@ Router.prototype.route_ = function (request, response) {
 	var pathname = request.getPathname();
 
 	var route = this.getRouteByHostAndPathname_(host, pathname);
+	if (!route) {
+		log(method + ' ' + pathname + ' -> 404 [no route]');
+		response.end(404);
+		return;
+	}
+
 	var target = (typeof route === 'number') ? route : route.target;
 
 	switch (typeof target) {
