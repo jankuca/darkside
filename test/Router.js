@@ -37,6 +37,20 @@ exports['should not have a default route declaration file path'] = function () {
 	assert.equal(router.getRouteDeclaration(), null);
 };
 
+exports['should not store an invalid route declaration file path'] = function () {
+	var thrown = false;
+
+	var router = new Router();
+	try {
+		router.setRouteDeclaration(MOCK_INVALID_DECLARATION_FILE_PATH);
+	} catch (err) {
+		thrown = true;
+	}
+
+	assert.equal(thrown, true);
+	assert.equal(router.getRouteDeclaration(), null);
+};
+
 exports['should store a correct route declaration file path'] = function () {
 	var router = new Router();
 
