@@ -1,4 +1,7 @@
 {
 	"name": "darkside",
-	"main": "index"
+	"main": "index",
+	"scripts": {
+		"test": "expresso -I lib"
+	}
 }

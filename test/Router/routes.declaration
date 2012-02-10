@@ -1,0 +1,11 @@
+www
+ / = 403
+ /400 = 400
+ /posts
+  / = 'front:post:index'
+  /:id<\d+> = 'front:post:show'
+  /:id<\d+>/comments = 'front:post:comments'
+  /error = 'front:post:error'
+  /test = 'front:post:test'
+  /* = 403
+ /view = 'front:view:show'
