@@ -18,6 +18,10 @@ It features an HTTP server, a request router, controllers and a MongoDB service.
 
     git submodule add git://github.com/jankuca/darkside.git node_modules/darkside
 
+**Download all dependencies.**
+
+    git submodule update --init --recursive
+
 **Declare your routes.**
 
     nano routes.declaration
@@ -43,24 +47,22 @@ If you wanted to handle requests on the subdomain `abc` different, you would wri
 
 The simpliest application (a static resource server) would be defined like this:
 
-    // Require the modules you need.
-    var HTTPServer = require('darkside/servers/HTTPServer');
-    var Router = require('darkside/Router');
-    var StaticResourceServer = require('darkside/servers/StaticResourceServer');
+    // Require the darkside modules
+    var darkside = require('darkside');
     
     function main() {
       // Create a router and feed it your route declaration file
-      var router = new Router();
+      var router = new darkside.Router();
       router.setRouteDeclaration('./routes.declaration');
 
       // Define a request handler
       // In a more sophisticated app, there would also be regular controllers.
       router.setRouteTypeHandler('static', function (pathname) {
-        return new StaticResourceServer(pathname);
+        return new darkside.StaticResourceServer(pathname);
       });
 
       // Create an HTTP server, assign the router to it and start it.
-      var http_server = new HTTPServer();
+      var http_server = darkside.createHTTPServer();
       http_server.setRouter(router);
       http_server.listen(2000); // Listen on port 2000
     };
