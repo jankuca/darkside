@@ -12,8 +12,10 @@ exports.ApiController = require('./lib/controllers/ApiController');
 exports.ViewController = require('./lib/controllers/ViewController');
 
 // models
-exports.Model = require('./lib/models/Model');
-exports.Session = require('./lib/models/Session');
+exports.EntityRepository = require('./lib/models/EntityRepository');
+exports.Entity = require('./lib/models/Entity');
+
+exports.SessionRepository = require('./lib/models/SessionRepository');
 
 // utils
 exports.DeclarationParser = require('./lib/util/DeclarationParser');
@@ -23,6 +25,8 @@ exports.Router = require('./lib/Router');
 exports.ServerRequest = require('./lib/ServerRequest');
 exports.ServerResponse = require('./lib/ServerResponse');
 exports.HTTPServerResponse = require('./lib/HTTPServerResponse');
+exports.ServiceContainer = require('./lib/ServiceContainer');
+exports.ControllerFactory = require('./lib/ControllerFactory');
 exports.View = require('./lib/View');
 exports.ViewStack = require('./lib/ViewStack');
 

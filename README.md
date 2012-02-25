@@ -51,22 +51,22 @@ The simpliest application (a static resource server) would be defined like this:
     var darkside = require('darkside');
     
     function main() {
-      // Create a router and feed it your route declaration file
+      // Create a router
       var router = new darkside.Router();
-      router.setRouteDeclaration('./routes.declaration');
-
       // Define a request handler
       // In a more sophisticated app, there would also be regular controllers.
       router.setRouteTypeHandler('static', function (pathname) {
         return new darkside.StaticResourceServer(pathname);
       });
-
+      // Feed the router your route declaration file
+      router.setRouteDeclaration('./app/routes.declaration');
+    
       // Create an HTTP server, assign the router to it and start it.
       var http_server = darkside.createHTTPServer();
       http_server.setRouter(router);
       http_server.listen(2000); // Listen on port 2000
     };
-
+    
     main();
 
 **Start your app.**

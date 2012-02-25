@@ -10,27 +10,6 @@ var MOCK_VALID_DECLARATION_FILE_PATH = path.resolve(__dirname, './Router/routes.
 var MOCK_APP_PATH = path.resolve(__dirname, './Router/app');
 
 
-exports['should have a correct default app path'] = function () {
-	var router = new Router();
-
-	assert.equal(router.getAppPath(), path.dirname(require.main.filename));
-};
-
-exports['should store a correct app path'] = function () {
-	var router = new Router();
-
-	router.setAppPath('./app');
-	var correct = path.resolve(path.dirname(require.main.filename), './app');
-	assert.equal(router.getAppPath(), correct);
-
-	router.setAppPath('./app/path-with-trailing-slash/');
-	var correct = path.resolve(path.dirname(require.main.filename), './app/path-with-trailing-slash');
-	assert.equal(router.getAppPath(), correct);
-
-	router.setAppPath('/tmp/path');
-	assert.equal(router.getAppPath(), '/tmp/path');
-};
-
 exports['should not have a default route declaration file path'] = function () {
 	var router = new Router();
 
@@ -216,7 +195,7 @@ exports['should route to a route type handler with correctly altered pathname'] 
 			}
 		};
 	};
-	
+
 	var countdown = 2;
 	var request = createRequest('GET', 'www.example.com', '/a/bc.d', '/a/bc.d');
 	var request_parametric = createRequest('GET', 'www.example.com', '/x/abc/y', '/');
@@ -299,6 +278,8 @@ exports['should return correct URLs for a different host'] = function () {
 	};
 
 	var request = createRequest('test.example.com');
+	var port_request = createRequest('test.example.com:2000');
+	var localhost_request = createRequest('test.localhost');
 
 	var router = new Router();
 	router.setRouteDeclaration(MOCK_VALID_DECLARATION_FILE_PATH);
@@ -318,6 +299,12 @@ exports['should return correct URLs for a different host'] = function () {
 
 		var url = router.getTargetURL('front:post:show', { 'category': 2 }, request);
 		assert.equal(url, null);
+
+		var url = router.getTargetURL('front:post:show', { 'id': 2 }, port_request);
+		assert.equal(url, 'http://www.example.com:2000/posts/2');
+
+		var url = router.getTargetURL('front:post:show', { 'id': 2 }, localhost_request);
+		assert.equal(url, 'http://www.localhost/posts/2');
 	}
 };
 
@@ -377,33 +364,39 @@ exports['should route to controller actions'] = function () {
 	var request = createRequest('GET', 'www.example.com', '/posts');
 	var request_parametric = createRequest('GET', 'www.example.com', '/posts/3');
 	var request_test = createRequest('GET', 'www.example.com', '/posts/test');
-	var MockController = require(path.join(MOCK_APP_PATH, 'controllers', 'front', 'PostController'));
-	MockController.onConstruct = function (controller) {
-		constructed -= 1;
-		assert.equal(controller.name, 'post');
-		assert.equal(controller.parent_name, 'front');
-		assert.equal(controller.router, router);
-	};
-	MockController.onActionCall = function (controller, action, params) {
-		called -= 1;
-		switch (action) {
-			case 'index':
-				assert.equal(controller.request, request);
-				assert.eql(params, {});
-				return;
-			case 'show':
-				assert.equal(controller.request, request_parametric);
-				assert.eql(params, { 'id': '3' });
-				return;
-			case 'test':
-				assert.equal(controller.request, request_test);
-				assert.eql(params, {});
-				break;
+
+	var factory = {
+		createController: function (namespace, controller_name, router, request, response) {
+			constructed -= 1;
+			assert.equal(namespace, 'front');
+			assert.equal(controller_name, 'post');
+			return {
+				request: request,
+				hasAction: function (action) {
+					return (action === 'index' || action === 'show' || action === 'error' || action === 'test');
+				},
+				callAction: function (action, params) {
+					called -= 1;
+					switch (action) {
+						case 'index':
+							assert.equal(this.request, request);
+							assert.eql(params, {});
+							return;
+						case 'show':
+							assert.equal(this.request, request_parametric);
+							assert.eql(params, { 'id': '3' });
+							return;
+						case 'test':
+							assert.equal(this.request, request_test);
+							assert.eql(params, {});
+							break;
+					}
+				}
+			};
 		}
 	};
 
-	var router = new Router();
-	router.setAppPath(MOCK_APP_PATH);
+	var router = new Router(factory);
 	router.setRouteDeclaration(MOCK_VALID_DECLARATION_FILE_PATH);
 	router.route(request, null);
 	router.route(request_parametric, null);
@@ -413,7 +406,7 @@ exports['should route to controller actions'] = function () {
 	assert.equal(called, 0, 'all requests handled');
 };
 
-exports['should fail with 500 on a missing controller actions'] = function () {
+exports['should fail with 500 on a missing controller'] = function () {
 	function createRequest(method, host, pathname) {
 		return {
 			getMethod: function () {
@@ -437,11 +430,58 @@ exports['should fail with 500 on a missing controller actions'] = function () {
 	};
 
 	var countdown = 1;
+	var factory = {
+		createController: function (namespace, controller_name, request, response) {
+			return {
+				hasAction: function (action) {
+					return (action === 'index' || action === 'show' || action === 'error' || action === 'test');
+				}
+			};
+		}
+	};
 	var request = createRequest('GET', 'www.example.com', '/posts/4/comments');
 	var response = createResponse(500);
 
-	var router = new Router();
-	router.setAppPath(MOCK_APP_PATH);
+	var router = new Router(factory);
+	router.setRouteDeclaration(MOCK_VALID_DECLARATION_FILE_PATH);
+	router.route(request, response);
+
+	assert.equal(countdown, 0, 'all requests handled');
+};
+
+exports['should fail with 500 on missing controller actions'] = function () {
+	function createRequest(method, host, pathname) {
+		return {
+			getMethod: function () {
+				return method;
+			},
+			getHostLevels: function () {
+				return host.split('.');
+			},
+			getPathname: function () {
+				return pathname;
+			}
+		};
+	};
+	function createResponse(expectation) {
+		return {
+			end: function (status) {
+				countdown -= 1;
+				assert.equal(status, expectation);
+			}
+		};
+	};
+
+	var countdown = 1;
+	var factory = {
+		createController: function () {
+			return null;
+		}
+	};
+	var request = createRequest('GET', 'www.example.com', '/posts/4/comments');
+	var response = createResponse(500);
+
+	var router = new Router(factory);
 	router.setRouteDeclaration(MOCK_VALID_DECLARATION_FILE_PATH);
 	router.route(request, response);
 
@@ -472,46 +512,24 @@ exports['should fail with 500 on an error thrown by a controller action'] = func
 	};
 
 	var countdown = 1;
+	var factory = {
+		createController: function (namespace, controller_name, request, response) {
+			return {
+				hasAction: function () {
+					return true;
+				},
+				callAction: function () {
+					throw new Error('Test');
+				}
+			}
+		}
+	};
 	var request = createRequest('GET', 'www.example.com', '/posts/error');
 	var response = createResponse(500);
 
-	var router = new Router();
-	router.setAppPath(MOCK_APP_PATH);
+	var router = new Router(factory);
 	router.setRouteDeclaration(MOCK_VALID_DECLARATION_FILE_PATH);
 	router.route(request, response);
 
 	assert.equal(countdown, 0, 'all requests handled');
-};
-
-exports['should provide an eventual view controller with the correct template root'] = function () {
-	function createRequest(method, host, pathname) {
-		return {
-			getMethod: function () {
-				return method;
-			},
-			getHostLevels: function () {
-				return host.split('.');
-			},
-			getPathname: function () {
-				return pathname;
-			}
-		};
-	};
-
-	var called = 1;
-
-	var request = createRequest('GET', 'www.example.com', '/view');
-	var correct = path.join(MOCK_APP_PATH, 'views', 'front');
-	var MockController = require(path.join(MOCK_APP_PATH, 'controllers', 'front', 'ViewController'));
-	MockController.onTemplateRoot = function (controller, template_root) {
-		called -= 1;
-		assert.equal(template_root, correct);
-	};
-
-	var router = new Router();
-	router.setAppPath(MOCK_APP_PATH);
-	router.setRouteDeclaration(MOCK_VALID_DECLARATION_FILE_PATH);
-	router.route(request, null);
-
-	assert.equal(called, 0, 'all requests handled');
 };
