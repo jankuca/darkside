@@ -47,7 +47,10 @@ exports.createHTTPServer = function (http) {
 	native_server.on('request', function (req, res) {
 		var request = new exports.ServerRequest(req);
 		var response = new exports.HTTPServerResponse(res);
-		server.handle(request, response);
+
+    request.once('body', function () {
+      server.handle(request, response);
+    });
 	});
 
 	return server;
