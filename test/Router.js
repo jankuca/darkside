@@ -1,7 +1,7 @@
 var assert = require('assert');
 var path = require('path');
 
-var Router = require('Router');
+var Router = require('../lib/Router');
 
 var MOCK_NONEXISTANT_DECLARATION_FILE_PATH = path.resolve(__dirname, './Router/routes-nonexistant.declaration');
 var MOCK_INVALID_DECLARATION_FILE_PATH = path.resolve(__dirname, './Router/routes-invalid.declaration');
@@ -208,7 +208,7 @@ exports['should route to a route type handler with correctly altered pathname'] 
 				countdown -= 1;
 				assert.equal(req, request);
 				assert.equal(res, null);
-				assert.eql(params, {});
+				assert.deepEqual(params, {});
 			}
 		})();
 	});
@@ -218,7 +218,7 @@ exports['should route to a route type handler with correctly altered pathname'] 
 				countdown -= 1;
 				assert.equal(req, request_parametric);
 				assert.equal(res, null);
-				assert.eql(params, { 'key': 'abc' });
+				assert.deepEqual(params, { 'key': 'abc' });
 			}
 		})();
 	});
@@ -380,15 +380,15 @@ exports['should route to controller actions'] = function () {
 					switch (action) {
 						case 'index':
 							assert.equal(this.request, request);
-							assert.eql(params, {});
+							assert.deepEqual(params, {});
 							return;
 						case 'show':
 							assert.equal(this.request, request_parametric);
-							assert.eql(params, { 'id': '3' });
+							assert.deepEqual(params, { 'id': '3' });
 							return;
 						case 'test':
 							assert.equal(this.request, request_test);
-							assert.eql(params, {});
+							assert.deepEqual(params, {});
 							break;
 					}
 				}
@@ -533,3 +533,6 @@ exports['should fail with 500 on an error thrown by a controller action'] = func
 
 	assert.equal(countdown, 0, 'all requests handled');
 };
+
+
+module.exports = { 'Router': exports };

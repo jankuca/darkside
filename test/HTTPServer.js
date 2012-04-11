@@ -1,6 +1,6 @@
 var assert = require('assert');
 
-var HTTPServer = require('servers/HTTPServer');
+var HTTPServer = require('../lib/servers/HTTPServer');
 
 
 exports['should accept a router'] = function () {
@@ -61,3 +61,6 @@ exports['should only route to a router without touching the request and the resp
 
 	assert.equal(countdown, 0, 'request not handled');
 };
+
+
+module.exports = { 'HTTPServer': exports };

@@ -1,7 +1,7 @@
 var assert = require('assert');
 var log = require('sys').log;
 
-var ServiceContainer = require('ServiceContainer');
+var ServiceContainer = require('../lib/ServiceContainer');
 
 
 exports['should allow adding a new service'] = function () {
@@ -129,3 +129,6 @@ exports['should throw when a service factory callback requests the service it is
 
 	assert.equal(thrown, true, 'did not throw');
 };
+
+
+module.exports = { 'ServiceContainer': exports };

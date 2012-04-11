@@ -1,16 +1,16 @@
 var assert = require('assert');
 
-var ServerRequest = require('ServerRequest');
+var EventEmitter = require('events').EventEmitter;
+var ServerRequest = require('../lib/ServerRequest');
 
 
 var createRequest = function (method, url, headers) {
-	return {
-		method: method,
-		url: url || '/',
-		headers: headers || {}
-	};
+	var request = new EventEmitter();
+	request.method = method;
+	request.url = url || '/';
+	request.headers = headers || {};
+	return request;
 };
-
 
 exports['should store correct pathname'] = function () {
 	var test = function (req, expectation) {
@@ -26,7 +26,7 @@ exports['should store correct pathname'] = function () {
 exports['should correctly split pathname'] = function () {
 	var test = function (req, expectation) {
 		var request = new ServerRequest(req);
-		assert.eql(request.getPathnameParts(), expectation);
+		assert.deepEqual(request.getPathnameParts(), expectation);
 	};
 
 	test(createRequest('GET', '/abc'), [ 'abc' ]);
@@ -46,7 +46,7 @@ exports['should store correct method'] = function () {
 exports['should correctly parse hostnames'] = function () {
 	var test = function (req, expectation) {
 		var request = new ServerRequest(req);
-		assert.eql(request.getHostLevels(), expectation);
+		assert.deepEqual(request.getHostLevels(), expectation);
 	};
 
 	test(createRequest(null, null, { 'host': 'www.example.com' }), [ 'www', 'example', 'com' ]);
@@ -70,8 +70,8 @@ exports['should correctly store and return headers'] = function () {
 	assert.equal(request1.getHeader('abc'), 'def');
 	assert.equal(request1.getHeader('Abc'), 'def');
 	assert.equal(request1.getHeader('x'), null);
-	assert.eql(request1.getHeaders(), req1.headers);
-	assert.eql(request2.getHeaders(), req2.headers);
+	assert.deepEqual(request1.getHeaders(), req1.headers);
+	assert.deepEqual(request2.getHeaders(), req2.headers);
 };
 
 exports['should return a copy of the headers'] = function () {
@@ -134,3 +134,6 @@ exports['should throw on invalid pathname modification and keep the original pat
 	test(createRequest(null, '/abc/def/ghi'), '../');
 	test(createRequest(null, '/abc/def/ghi'), '/parent/abc/def/ghi');
 };
+
+
+module.exports = { 'ServerRequest': exports };

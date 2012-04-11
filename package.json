@@ -1,7 +1,9 @@
 {
 	"name": "darkside",
+  "version": "1.0.0",
+  "private": true,
 	"main": "index",
 	"scripts": {
-		"test": "expresso -I lib"
+		"test": "mocha -u exports -R spec"
 	}
 }
