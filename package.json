@@ -1,9 +1,21 @@
 {
-	"name": "darkside",
+  "name": "darkside",
   "version": "1.0.0",
   "private": true,
-	"main": "index",
-	"scripts": {
-		"test": "mocha -u exports -R spec"
-	}
+  "main": "index",
+  "dependencies": {
+    "mongodb-lite": "1.x.x",
+    "eco": "1.x.x",
+    "coffee-script": "1.x.x",
+    "strscan": "1.x.x"
+  },
+  "devDependencies": {
+    "mocha": ">= 1.x.x"
+  },
+  "engine": {
+    "node": ">= 0.4"
+  },
+  "scripts": {
+    "test": "mocha -u exports -R spec"
+  }
 }
