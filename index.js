@@ -55,3 +55,31 @@ exports.createHTTPServer = function (http) {
 
 	return server;
 };
+
+
+/**
+ * @typedef {!{
+ *   services: exports.ServiceContainer,
+ *   controller_factory: exports.ControllerFactory,
+ *   router: exports.Router
+ * }}
+ */
+var Application;
+
+/**
+ * Creates a basic application graph consisting of a service container,
+ * a controller factory and a router
+ * @param {string} app_path The path to the application directory.
+ * @return {!Application}
+ */
+exports.createApplication = function (app_path) {
+  var services = new exports.ServiceContainer();
+  var controller_factory = new exports.ControllerFactory(app_path, services);
+  var router = new exports.Router(controller_factory);
+
+  return {
+    services: services,
+    controller_factory: controller_factory,
+    router: router
+  };
+};
