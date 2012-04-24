@@ -23,7 +23,9 @@ exports.DeclarationParser = require('./lib/util/DeclarationParser');
 // general
 exports.Router = require('./lib/Router');
 exports.ServerRequest = require('./lib/ServerRequest');
+exports.WebSocketServerRequest = require('./lib/WebSocketServerRequest');
 exports.ServerResponse = require('./lib/ServerResponse');
+exports.WebSocketServerResponse = require('./lib/WebSocketServerResponse');
 exports.HTTPServerResponse = require('./lib/HTTPServerResponse');
 exports.ServiceContainer = require('./lib/ServiceContainer');
 exports.ControllerFactory = require('./lib/ControllerFactory');
@@ -54,6 +56,64 @@ exports.createHTTPServer = function (http) {
 	});
 
 	return server;
+};
+
+exports.createWebSocketServer = function (server, socketio) {
+  socketio = socketio || require('socket.io');
+
+  var native_server;
+  if (server) {
+    native_server = server.getNativeServer();
+  } else {
+    native_server = require('http').createServer();
+    server = new exports.HTTPServer(native_server);
+  }
+
+  var io = socketio.listen(native_server);
+
+  io.enable('browser client minification');
+  io.enable('browser client gzip');
+  io.set('log level', 1);
+
+  io.sockets.on('connection', function (socket) {
+    socket.on('request', function (req, respond) {
+      req = (typeof req === 'object') ? req : {};
+      if (!req['path']) {
+        respond({
+          'status': 400,
+          'body': {
+            'error': 'No request path specified'
+          }
+        });
+        return;
+      }
+      if (!req['host']) {
+        respond({
+          'status': 400,
+          'body': {
+            'error': 'No host specified'
+          }
+        });
+        return;
+      }
+
+      var head = {
+        method: req['method'] || 'GET',
+        path: req['path'],
+        headers: req['headers'] || {}
+      };
+      head.headers['host'] = req['host'];
+
+      var body = req['body'] || null;
+
+      var request = new exports.WebSocketServerRequest(head, body);
+      var response = new exports.WebSocketServerResponse(respond);
+
+      server.handle(request, response);
+    });
+  });
+
+  return server;
 };
 
 
