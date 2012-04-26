@@ -36,6 +36,24 @@ exports.ViewStack = require('./lib/ViewStack');
 // static methods
 
 /**
+ * Calls a super constructor of an object.
+ * @param {!Object} instance An object.
+ */
+exports.base = function (Constructor, instance /* ..args */) {
+  var args = Array.prototype.slice.call(arguments, 2);
+
+  var constructor = instance.constructor;
+  var ancestor = constructor.super_;
+  var injector = instance.$$injector;
+
+  if (!injector) {
+    throw new Error('Not a dependency injection participant');
+  }
+
+  injector.inject(Constructor, instance);
+};
+
+/**
  * Creates an HTTPServer instance bound to a native http.Server
  * @param {?Object} http The http module to use for the native server
  * @reutnr {exports.HTTPServer}
