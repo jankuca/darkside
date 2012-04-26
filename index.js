@@ -95,39 +95,20 @@ exports.createWebSocketServer = function (server, socketio) {
 
   io.sockets.on('connection', function (socket) {
     socket.on('request', function (req, respond) {
-      req = (typeof req === 'object') ? req : {};
-      if (!req['path']) {
+      try {
+        var request = new exports.WebSocketServerRequest(req);
+        var response = new exports.WebSocketServerResponse(respond);
+
+        server.handle(request, response);
+
+      } catch (err) {
         respond({
           'status': 400,
           'body': {
-            'error': 'No request path specified'
+            'error': err.message
           }
         });
-        return;
       }
-      if (!req['host']) {
-        respond({
-          'status': 400,
-          'body': {
-            'error': 'No host specified'
-          }
-        });
-        return;
-      }
-
-      var head = {
-        method: req['method'] || 'GET',
-        path: req['path'],
-        headers: req['headers'] || {}
-      };
-      head.headers['host'] = req['host'];
-
-      var body = req['body'] || null;
-
-      var request = new exports.WebSocketServerRequest(head, body);
-      var response = new exports.WebSocketServerResponse(respond);
-
-      server.handle(request, response);
     });
   });
 
