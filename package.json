@@ -2,7 +2,27 @@
   "name": "darkside",
   "version": "1.0.0",
   "description": "Web App Framework (HTTP, WebSockets, MVC, DI)",
+  "contributors": [
+    {
+      "name": "Jan Kuča",
+      "email": "jan@jankuca.com",
+      "web": "http://jankuca.com"
+    }
+  ],
+  "maintainers": [
+    {
+      "name": "Jan Kuča",
+      "email": "jan@jankuca.com",
+      "web": "http://jankuca.com"
+    }
+  ],
   "main": "index",
+  "repositories": [
+    {
+      "type": "git",
+      "url": "git://github.com/jankuca/darkside.git"
+    }
+  ],
   "dependencies": {
     "mongodb-lite": "1.x.x",
     "eco": "1.x.x",
