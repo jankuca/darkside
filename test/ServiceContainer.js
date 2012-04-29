@@ -23,17 +23,11 @@ exports['should return a correct service'] = function () {
 	assert.equal(result, service);
 };
 
-exports['should throw when the requested service is not defined'] = function () {
+exports['should return null when the requested service is not defined'] = function () {
 	var container = new ServiceContainer();
 
-	var thrown = false;
-	try {
-		container.getService('mock');
-	} catch (err) {
-		thrown = true;
-	}
-
-	assert.equal(thrown, true);
+	var service = container.getService('mock');
+	assert.equal(service, null);
 };
 
 exports['should throw on an invalid service factory'] = function () {
