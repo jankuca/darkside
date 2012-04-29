@@ -112,6 +112,8 @@ exports.createWebSocketServer = function (server, socketio) {
     });
   });
 
+  server.io = io;
+
   return server;
 };
 
