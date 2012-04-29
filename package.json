@@ -1,6 +1,7 @@
 {
   "name": "darkside",
   "version": "1.0.0",
+  "description": "Web App Framework (HTTP, WebSockets, MVC, DI)",
   "main": "index",
   "dependencies": {
     "mongodb-lite": "1.x.x",
