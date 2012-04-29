@@ -14,7 +14,7 @@
     "mocha": ">= 1.x.x"
   },
   "engine": {
-    "node": ">= 0.4"
+    "node": ">= 0.4.x"
   },
   "scripts": {
     "test": "mocha -u exports -R spec"
