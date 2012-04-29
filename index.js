@@ -96,7 +96,7 @@ exports.createWebSocketServer = function (server, socketio) {
   io.sockets.on('connection', function (socket) {
     socket.on('request', function (req, respond) {
       try {
-        var request = new exports.WebSocketServerRequest(req);
+        var request = new exports.WebSocketServerRequest(req, socket);
         var response = new exports.WebSocketServerResponse(respond);
 
         server.handle(request, response);
