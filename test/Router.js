@@ -115,11 +115,14 @@ exports['should request request info (method, host and pathname)'] = function ()
 		},
 		getHostLevels: function () {
 			requested_host = true;
-			return [ 'www', 'ęxample', 'com' ];
+			return [ 'www', 'example', 'com' ];
 		},
 		getPathname: function () {
 			requested_pathname = true;
 			return '/';
+		},
+		getQuery: function () {
+			return {};
 		}
 	};
 	var response = {
@@ -147,6 +150,9 @@ exports['should route to HTTP status codes'] = function () {
 			},
 			getPathname: function () {
 				return pathname;
+			},
+			getQuery: function () {
+				return {};
 			}
 		};
 	};
@@ -192,6 +198,9 @@ exports['should route to a route type handler with correctly altered pathname'] 
 			},
 			setPathname: function (altered) {
 				assert.equal(altered, expected_altered);
+			},
+			getQuery: function () {
+				return {};
 			}
 		};
 	};
@@ -235,6 +244,9 @@ exports['should return correct URLs for the same host'] = function () {
 		return {
 			getHostLevels: function () {
 				return host.split('.');
+			},
+			getQuery: function () {
+				return {};
 			}
 		};
 	};
@@ -273,6 +285,9 @@ exports['should return correct URLs for a different host'] = function () {
 			},
 			getHostLevels: function () {
 				return host.split(':')[0].split('.');
+			},
+			getQuery: function () {
+				return {};
 			}
 		};
 	};
@@ -316,6 +331,9 @@ exports['should return correct URLs for a different host and port'] = function (
 			},
 			getHostLevels: function () {
 				return host.split(':')[0].split('.');
+			},
+			getQuery: function () {
+				return {};
 			}
 		};
 	};
@@ -354,6 +372,9 @@ exports['should route to controller actions'] = function () {
 			},
 			getPathname: function () {
 				return pathname;
+			},
+			getQuery: function () {
+				return {};
 			}
 		};
 	};
@@ -417,6 +438,9 @@ exports['should fail with 500 on a missing controller'] = function () {
 			},
 			getPathname: function () {
 				return pathname;
+			},
+			getQuery: function () {
+				return {};
 			}
 		};
 	};
@@ -460,6 +484,9 @@ exports['should fail with 500 on missing controller actions'] = function () {
 			},
 			getPathname: function () {
 				return pathname;
+			},
+			getQuery: function () {
+				return {};
 			}
 		};
 	};
@@ -499,6 +526,9 @@ exports['should fail with 500 on an error thrown by a controller action'] = func
 			},
 			getPathname: function () {
 				return pathname;
+			},
+			getQuery: function () {
+				return {};
 			}
 		};
 	};
