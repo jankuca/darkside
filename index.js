@@ -59,6 +59,17 @@ exports.base = function (Constructor, instance /* ..args */) {
 };
 
 /**
+ * Extends one object with another
+ * @param {!Object} obj The object to extend.
+ * @param {!Object} extension The extension.
+ */
+exports.extend = function (obj, extension) {
+  Object.keys(extension).forEach(function (key) {
+    obj[key] = extension[key];
+  });
+};
+
+/**
  * Creates an HTTPServer instance bound to a native http.Server
  * @param {?Object} http The http module to use for the native server
  * @reutnr {exports.HTTPServer}
