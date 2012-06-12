@@ -55,7 +55,7 @@ exports.base = function (Constructor, instance /* ..args */) {
     throw new Error('Not a dependency injection participant');
   }
 
-  injector.inject(Constructor, instance);
+  injector.inject.apply(injector, [ Constructor, instance ].concat(args));
 };
 
 /**
