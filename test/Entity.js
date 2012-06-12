@@ -166,7 +166,7 @@ it['should correctly calculate a diff against a merge'] = function () {
   var entity = new Entity();
 
   entity.update(doc);
-  entity.merge();
+  entity.merge(doc);
   assert.deepEqual(entity.getDocumentDiff(), {});
 
   entity.update(update);
