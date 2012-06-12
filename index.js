@@ -31,6 +31,11 @@ exports.ServiceContainer = require('./lib/ServiceContainer');
 exports.ControllerFactory = require('./lib/ControllerFactory');
 exports.View = require('./lib/View');
 exports.ViewStack = require('./lib/ViewStack');
+exports.ViewStackFactory = require('./lib/ViewStackFactory');
+
+
+// view helpers
+exports.view_helpers = require('./lib/view-helpers');
 
 
 // static methods
@@ -137,10 +142,15 @@ exports.createApplication = function (app_path) {
   var services = new exports.ServiceContainer();
   var controller_factory = new exports.ControllerFactory(app_path, services);
   var router = new exports.Router(controller_factory);
+  var view_stacks = new exports.ViewStackFactory();
+
+  view_stacks.helpers = Object.create(exports.view_helpers);
+  services.setService('$view_stacks', view_stacks);
 
   return {
     services: services,
     controller_factory: controller_factory,
+    view_stacks: view_stacks,
     router: router
   };
 };
