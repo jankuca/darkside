@@ -33,6 +33,8 @@ exports.View = require('./lib/View');
 exports.ViewStack = require('./lib/ViewStack');
 exports.ViewStackFactory = require('./lib/ViewStackFactory');
 
+// colors
+exports.colors = require('./lib/colors');
 
 // view helpers
 exports.view_helpers = require('./lib/view-helpers');
