@@ -24,6 +24,7 @@
     }
   ],
   "dependencies": {
+    "relative-datetime": "1.x.x",
     "mongodb-lite": "1.x.x",
     "eco": "1.x.x",
     "coffee-script": "1.x.x",
