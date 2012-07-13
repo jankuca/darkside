@@ -1,5 +1,5 @@
 var assert = require('assert');
-var log = require('sys').log;
+var log = require('util').log;
 
 var ServiceContainer = require('../lib/ServiceContainer');
 
