@@ -29,6 +29,7 @@
     "eco": "1.x.x",
     "coffee-script": "1.x.x",
     "strscan": "1.x.x",
+    "formidable": "1.x.x",
     "socket.io": "~0.9.6"
   },
   "devDependencies": {
