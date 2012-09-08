@@ -62,6 +62,8 @@ exports.base = function (Constructor, instance /* ..args */) {
   injector.inject.apply(injector, [ Constructor, instance ].concat(args));
 };
 
+exports.inherits = require('util').inherits;
+
 /**
  * Extends one object with another
  * @param {!Object} obj The object to extend.
