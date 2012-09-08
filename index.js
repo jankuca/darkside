@@ -1,3 +1,5 @@
+var path = require('path');
+
 
 // servers
 exports.HTTPServer = require('./lib/servers/HTTPServer');
@@ -159,6 +161,15 @@ exports.createApplication = function (app_path) {
 
   view_stacks.helpers = Object.create(exports.view_helpers);
   services.setService('$view_stacks', view_stacks);
+
+  router.setRouteTypeHandler('static', function (relative) {
+    var absolute = path.join(app_path, relative);
+    return new exports.StaticResourceServer(absolute);
+  });
+  services.setServiceTypeHandler('include', function (relative) {
+    var absolute = path.join(app_path, relative);
+    return require(absolute);
+  });
 
   return {
     services: services,
