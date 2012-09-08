@@ -140,9 +140,10 @@ exports.createWebSocketServer = function (server, socketio) {
 
 /**
  * @typedef {!{
- *   services: exports.ServiceContainer,
- *   controller_factory: exports.ControllerFactory,
- *   router: exports.Router
+ *   services: !exports.ServiceContainer,
+ *   controller_factory: !exports.ControllerFactory,
+ *   router: !exports.Router,
+ *   server: exports.HTTPServer
  * }}
  */
 var Application;
@@ -177,4 +178,24 @@ exports.createApplication = function (app_path) {
     view_stacks: view_stacks,
     router: router
   };
+};
+
+
+/**
+ * Creates an application with an HTTP server
+ * @param {string} app_path The path to the application directory.
+ * @return {!Application}
+ */
+exports.create = function (app_path) {
+  var app = exports.createApplication(app_path);
+  var server = exports.createHTTPServer();
+
+  server.setRouter(app.router);
+
+  app.server = server;
+  app.run = function (port) {
+    this.server.listen(port);
+  };
+
+  return app;
 };
