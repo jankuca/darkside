@@ -1,6 +1,6 @@
 {
   "name": "darkside",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Web App Framework (HTTP, WebSockets, MVC, DI)",
   "contributors": [
     {
