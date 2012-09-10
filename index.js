@@ -188,9 +188,14 @@ exports.createApplication = function (app_path) {
  * @param {string} app_path The path to the application directory.
  * @return {!Application}
  */
-exports.create = function (app_path) {
+exports.create = function (app_path, options) {
   var app = exports.createApplication(app_path);
   var server = exports.createHTTPServer();
+
+  if (options && options.ws) {
+    exports.createWebSocketServer(server);
+    app.services.setService('$io', server.io);
+  }
 
   server.setRouter(app.router);
 
