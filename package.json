@@ -26,6 +26,7 @@
   "dependencies": {
     "relative-datetime": "1.x.x",
     "mongodb-lite": "1.x.x",
+    "node-static": "0.6.x",
     "eco": "1.x.x",
     "coffee-script": "1.x.x",
     "strscan": "1.x.x",
