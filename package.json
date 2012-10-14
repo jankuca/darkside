@@ -1,6 +1,6 @@
 {
   "name": "darkside",
-  "version": "1.1.7",
+  "version": "1.1.8",
   "description": "Web App Framework (HTTP, WebSockets, MVC, DI)",
   "contributors": [
     {
@@ -25,7 +25,7 @@
   ],
   "dependencies": {
     "relative-datetime": "1.x.x",
-    "mongodb-lite": "1.x.x",
+    "mongodb-lite": "1.0.9",
     "node-static": "0.6.x",
     "eco": "1.x.x",
     "coffee-script": "1.x.x",
