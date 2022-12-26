@@ -28,7 +28,7 @@
     "mongodb-lite": "1.0.x",
     "node-static": "0.6.x",
     "eco": "1.x.x",
-    "coffee-script": "1.x.x",
+    "coffee-script": "1.2.x",
     "strscan": "1.x.x",
     "formidable": "1.x.x",
     "socket.io": "~0.9.6"
